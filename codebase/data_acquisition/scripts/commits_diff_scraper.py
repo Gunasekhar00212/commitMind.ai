@@ -16,8 +16,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument("repos", nargs="+", help="owner/name, one or more")
 parser.add_argument("--target", type=int, default=500, help="stop after this many saved records")
 parser.add_argument("--pages", type=int, default=50, help="max pages (100 commits each) per repo")
+parser.add_argument("--per-repo", type=int, default=0, help="cap per repo, 0 = no cap")
 args = parser.parse_args()
-REPOS, TARGET, PAGES = args.repos, args.target, args.pages
+REPOS, TARGET, PAGES, PER_REPO = args.repos, args.target, args.pages, args.per_repo
 
 MAX_DIFF_CHARS = 12_000
 SECRET = re.compile(
@@ -55,7 +56,7 @@ def collect():
                 if not items:
                     break
                 for item in items:
-                    if saved >= TARGET:
+                    if saved >= TARGET or (PER_REPO and hits >= PER_REPO):
                         break
                     if item['sha'] in seen:
                         continue
